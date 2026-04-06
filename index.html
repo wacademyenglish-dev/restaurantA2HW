@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLF LABS | HW: Restaurant Guide</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- WOLF LABS SUPREME ENGINE (HW EDITION: PROGRESSIVE CARDS) --- */
+        :root {
+            --bg-base: #0f172a; 
+            --brand-main: #ef4444; /* Red / Dining */
+            --accent: #f59e0b; /* Amber */
+            --accent-glow: rgba(239, 68, 68, 0.5);
+            --correct: #10b981; 
+            --incorrect: #ef4444; 
+            --text-main: #f8fafc;
+            --text-dim: #cbd5e1;
+            --glass-bg: rgba(15, 23, 42, 0.85); 
+            --glass-border: rgba(255, 255, 255, 0.15); 
+            --font-display: 'Montserrat', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            scroll-behavior: smooth;
+        }
+
+        /* --- BACKGROUNDS --- */
+        .bg-image {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=2574&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+            opacity: 0.15; z-index: -2; filter: contrast(120%) brightness(0.5) blur(5px);
+        }
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.98) 100%);
+            z-index: -1;
+        }
+
+        .ambient-orbs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.2; animation: floatOrb 25s infinite ease-in-out alternate; }
+        .orb-1 { width: 50vw; height: 50vw; background: var(--brand-main); top: -10%; left: -10%; }
+        .orb-2 { width: 40vw; height: 40vw; background: var(--accent); bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        @keyframes floatOrb { from { transform: translate(0, 0); } to { transform: translate(30px, 30px); } }
+
+        /* --- CONTAINERS --- */
+        .hw-container { width: 100%; max-width: 800px; z-index: 10; display: flex; flex-direction: column; gap: 30px; padding-bottom: 100px; }
+
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(35px) saturate(120%); -webkit-backdrop-filter: blur(35px) saturate(120%);
+            border: 1px solid var(--glass-border); border-top: 3px solid var(--brand-main);
+            padding: 40px 50px; border-radius: 24px; width: 100%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+        }
+
+        /* --- PROGRESSIVE CARDS --- */
+        .q-card {
+            display: none;
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .q-card.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .q-card.locked {
+            border-top-color: var(--correct);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
+        }
+        .q-card.locked .hw-options { pointer-events: none; }
+        .q-card.locked .hw-opt-btn:not(.correct) { opacity: 0.3; filter: grayscale(100%); }
+
+        /* --- TYPOGRAPHY --- */
+        h1 { font-family: var(--font-display); font-size: 3.5rem; line-height: 1.1; margin-bottom: 10px; color: #fff; text-transform: uppercase; letter-spacing: -1px; text-align: center; text-shadow: 0 5px 15px rgba(0,0,0,0.5);}
+        h2 { font-family: var(--font-display); font-size: 1.6rem; color: var(--brand-main); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; display: flex; align-items: center; gap: 10px;}
+        p { font-size: 1.2rem; line-height: 1.6; color: var(--text-dim); margin-bottom: 20px;}
+        .pt-text { font-size: 1rem; color: #94a3b8; font-style: italic; display: block; margin-top: 5px; font-family: var(--font-code);}
+        
+        .tag { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--brand-main); color: var(--brand-main); padding: 5px 12px; border-radius: 8px; font-family: var(--font-code); font-size: 0.9rem; font-weight: bold; }
+        .q-number { background: var(--brand-main); color: #fff; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.2rem; flex-shrink: 0; }
+
+        /* --- INPUTS & EXERCISES --- */
+        .input-group { margin-bottom: 25px; }
+        .input-group label { display: block; font-weight: 700; margin-bottom: 10px; font-size: 1.2rem; color: #fff; }
+        
+        input[type="text"], textarea {
+            width: 100%; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.1);
+            color: #fff; padding: 18px 25px; border-radius: 16px; font-size: 1.2rem;
+            font-family: var(--font-body); outline: none; transition: 0.3s; box-shadow: inset 0 5px 15px rgba(0,0,0,0.3);
+        }
+        input[type="text"]:focus, textarea:focus { border-color: var(--brand-main); background: rgba(239, 68, 68, 0.05); box-shadow: inset 0 5px 15px rgba(0,0,0,0.3), 0 0 15px rgba(239, 68, 68, 0.2);}
+        
+        .question-text { font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; color: #fff; line-height: 1.5; display: flex; gap: 15px; align-items: flex-start;}
+        
+        /* --- INTERACTIVE BUTTONS --- */
+        .hw-options { display: flex; flex-direction: column; gap: 12px; }
+        .hw-opt-btn {
+            background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
+            color: #fff; padding: 16px 24px; border-radius: 14px; font-size: 1.2rem;
+            cursor: pointer; transition: 0.2s; font-family: var(--font-body); font-weight: 500;
+            text-align: left; display: flex; align-items: center; gap: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .hw-opt-btn i { font-size: 1.3rem; color: #64748b; }
+        .hw-opt-btn:hover { background: rgba(239, 68, 68, 0.1); border-color: var(--brand-main); transform: translateX(8px); }
+        .hw-opt-btn:hover i { color: var(--brand-main); }
+        
+        .hw-opt-btn.correct { background: rgba(16, 185, 129, 0.15); color: #fff; border-color: var(--correct); font-weight: 700; box-shadow: 0 5px 25px rgba(16, 185, 129, 0.3); transform: translateX(10px);}
+        .hw-opt-btn.correct i { color: var(--correct); }
+        .hw-opt-btn.error { background: var(--incorrect); color: #fff; border-color: var(--incorrect); animation: shake 0.4s;}
+        .hw-opt-btn.error i { color: #fff; }
+
+        .btn-submit { 
+            width: 100%; -webkit-appearance: none; appearance: none; outline: none;
+            padding: 22px; border: none; border-radius: 16px; font-weight: 800; font-size: 1.3rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 12px; background: linear-gradient(135deg, var(--brand-main), var(--accent)); color: #fff; box-shadow: 0 15px 35px var(--accent-glow); font-family: var(--font-body); margin-top: 10px;
+        }
+        .btn-submit:hover { transform: translateY(-4px); box-shadow: 0 20px 45px rgba(245, 158, 11, 0.6); }
+
+        #score-display { display: none; text-align: center; margin-top: 20px; font-family: var(--font-display); font-size: 3rem; color: var(--correct); background: rgba(16, 185, 129, 0.1); padding: 40px; border-radius: 20px; border: 2px dashed var(--correct); box-shadow: inset 0 0 30px rgba(16,185,129,0.2);}
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+        /* Confetti */
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+        
+        /* Progress Indicator */
+        .progress-hud { position: fixed; top: 20px; right: 20px; background: rgba(15,23,42,0.8); border: 1px solid var(--brand-main); padding: 10px 20px; border-radius: 50px; font-family: var(--font-code); font-weight: bold; color: #fff; z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.5); backdrop-filter: blur(10px);}
+    </style>
+</head>
+<body>
+
+    <div class="ambient-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="progress-hud" id="progress-hud">0 / 15</div>
+
+    <div class="hw-container" id="main-container">
+        
+        <!-- HEADER & SYNC -->
+        <div class="glass-panel" id="header-panel" style="text-align: center; padding: 60px 40px;">
+            <i class="fa-solid fa-bell-concierge" style="font-size: 3.5rem; color: var(--brand-main); margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--accent-glow));"></i>
+            <h1>Digital Homework</h1>
+            <p style="font-size: 1.5rem; color: #fff; font-weight: 300;">Lesson: Ordering Food <span class="tag">A1 / A2</span></p>
+            
+            <div style="max-width: 400px; margin: 30px auto 0;">
+                <input type="text" id="student-name" placeholder="Enter your name to start..." required style="text-align: center; margin-bottom: 15px;">
+                <button class="btn-submit" onclick="startHomework()" style="padding: 16px; font-size: 1.1rem;"><i class="fa-solid fa-play"></i> Start Mission</button>
+            </div>
+        </div>
+
+        <!-- ================= DYNAMIC CARDS ================= -->
+        
+        <!-- Q1 -->
+        <div class="glass-panel q-card" id="qCard-1">
+            <h2><i class="fa-solid fa-book-open"></i> Vocabulary</h2>
+            <div class="question-text">
+                <span class="q-number">1</span> 
+                <div>
+                    An arrangement to keep a table for you.
+                    <span class="pt-text">Um acordo para guardar uma mesa para si.</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 1, false)"><i class="fa-regular fa-circle"></i> Check</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 1, true)"><i class="fa-regular fa-circle"></i> Reservation</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 1, false)"><i class="fa-regular fa-circle"></i> Appetizer</button>
+            </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="glass-panel q-card" id="qCard-2">
+            <h2><i class="fa-solid fa-martini-glass"></i> Vocabulary</h2>
+            <div class="question-text">
+                <span class="q-number">2</span> 
+                <div>
+                    A formal word for a drink of any type.
+                    <span class="pt-text">Uma palavra formal para qualquer tipo de bebida.</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 2, false)"><i class="fa-regular fa-circle"></i> Entree</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 2, false)"><i class="fa-regular fa-circle"></i> Tip</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 2, true)"><i class="fa-regular fa-circle"></i> Beverage</button>
+            </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="glass-panel q-card" id="qCard-3">
+            <h2><i class="fa-solid fa-utensils"></i> Vocabulary</h2>
+            <div class="question-text">
+                <span class="q-number">3</span> 
+                <div>
+                    Food served before the main course.
+                    <span class="pt-text">Comida servida antes do prato principal (Entrada).</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 3, true)"><i class="fa-regular fa-circle"></i> Appetizer</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 3, false)"><i class="fa-regular fa-circle"></i> Entree</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 3, false)"><i class="fa-regular fa-circle"></i> Dessert</button>
+            </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="glass-panel q-card" id="qCard-4">
+            <h2><i class="fa-solid fa-fire"></i> Vocabulary</h2>
+            <div class="question-text">
+                <span class="q-number">4</span> 
+                <div>
+                    When the meat is cooked completely (no red or pink).
+                    <span class="pt-text">Quando a carne é totalmente cozinhada (bem passada).</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 4, false)"><i class="fa-regular fa-circle"></i> Raw</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 4, true)"><i class="fa-regular fa-circle"></i> Well done</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 4, false)"><i class="fa-regular fa-circle"></i> Rare</button>
+            </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="glass-panel q-card" id="qCard-5">
+            <h2><i class="fa-solid fa-money-bill-wave"></i> Vocabulary</h2>
+            <div class="question-text">
+                <span class="q-number">5</span> 
+                <div>
+                    Extra money given to a waiter for their service.
+                    <span class="pt-text">Dinheiro extra dado ao empregado de mesa pelo serviço (Gorjeta).</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 5, false)"><i class="fa-regular fa-circle"></i> Split</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 5, false)"><i class="fa-regular fa-circle"></i> Check</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 5, true)"><i class="fa-regular fa-circle"></i> Tip</button>
+            </div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="glass-panel q-card" id="qCard-6">
+            <h2><i class="fa-solid fa-comment-dots"></i> Polite Requests</h2>
+            <div class="question-text">
+                <span class="q-number">6</span> 
+                <div>
+                    Which phrase is polite and professional?
+                    <span class="pt-text">Que frase é educada e profissional num restaurante?</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 6, false)"><i class="fa-regular fa-circle"></i> I want some water.</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 6, true)"><i class="fa-regular fa-circle"></i> I would like some water.</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 6, false)"><i class="fa-regular fa-circle"></i> Give me water.</button>
+            </div>
+        </div>
+
+        <!-- Q7 -->
+        <div class="glass-panel q-card" id="qCard-7">
+            <h2><i class="fa-solid fa-comment-dots"></i> Polite Requests</h2>
+            <div class="question-text">
+                <span class="q-number">7</span> 
+                <div>
+                    Complete the phrase: "Can I ________ some calamari, please?"
+                    <span class="pt-text">Complete a frase: "Pode trazer-me lulas, por favor?"</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 7, true)"><i class="fa-regular fa-circle"></i> get</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 7, false)"><i class="fa-regular fa-circle"></i> order it</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 7, false)"><i class="fa-regular fa-circle"></i> eat</button>
+            </div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="glass-panel q-card" id="qCard-8">
+            <h2><i class="fa-solid fa-user-tie"></i> Comprehension</h2>
+            <div class="question-text">
+                <span class="q-number">8</span> 
+                <div>
+                    The person who takes your order and brings your food is the ________.
+                    <span class="pt-text">A pessoa que anota o pedido e traz a comida é o(a)...</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 8, false)"><i class="fa-regular fa-circle"></i> Customer</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 8, true)"><i class="fa-regular fa-circle"></i> Waiter / Waitress</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 8, false)"><i class="fa-regular fa-circle"></i> Host</button>
+            </div>
+        </div>
+
+        <!-- Q9 -->
+        <div class="glass-panel q-card" id="qCard-9">
+            <h2><i class="fa-solid fa-receipt"></i> Comprehension</h2>
+            <div class="question-text">
+                <span class="q-number">9</span> 
+                <div>
+                    The paper showing how much money you need to pay is the ________.
+                    <span class="pt-text">O papel que mostra o valor a pagar é a...</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 9, false)"><i class="fa-regular fa-circle"></i> Menu</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 9, false)"><i class="fa-regular fa-circle"></i> Order</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 9, true)"><i class="fa-regular fa-circle"></i> Check (or Bill)</button>
+            </div>
+        </div>
+
+        <!-- Q10 -->
+        <div class="glass-panel q-card" id="qCard-10">
+            <h2><i class="fa-solid fa-credit-card"></i> Comprehension</h2>
+            <div class="question-text">
+                <span class="q-number">10</span> 
+                <div>
+                    To divide the cost of the meal with a friend is to "________ the bill".
+                    <span class="pt-text">Dividir o custo da refeição com um amigo é "________ a conta".</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 10, false)"><i class="fa-regular fa-circle"></i> cut</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 10, true)"><i class="fa-regular fa-circle"></i> split</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 10, false)"><i class="fa-regular fa-circle"></i> leave</button>
+            </div>
+        </div>
+
+        <!-- Q11 -->
+        <div class="glass-panel q-card" id="qCard-11">
+            <h2><i class="fa-solid fa-triangle-exclamation"></i> Culture & Context</h2>
+            <div class="question-text">
+                <span class="q-number">11</span> 
+                <div>
+                    If you have a bad physical reaction to milk or nuts, you have a food ________.
+                    <span class="pt-text">Se tiveres uma má reação a leite ou nozes, tens uma ________ alimentar.</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 11, true)"><i class="fa-regular fa-circle"></i> allergy</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 11, false)"><i class="fa-regular fa-circle"></i> diet</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 11, false)"><i class="fa-regular fa-circle"></i> tip</button>
+            </div>
+        </div>
+
+        <!-- Q12 -->
+        <div class="glass-panel q-card" id="qCard-12">
+            <h2><i class="fa-solid fa-globe"></i> Culture & Context</h2>
+            <div class="question-text">
+                <span class="q-number">12</span> 
+                <div>
+                    In the US, it is considered rude if you don't leave a ________ for the waiter.
+                    <span class="pt-text">Nos EUA, é considerado rude se não deixares uma ________ para o empregado.</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 12, false)"><i class="fa-regular fa-circle"></i> reservation</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 12, true)"><i class="fa-regular fa-circle"></i> tip</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 12, false)"><i class="fa-regular fa-circle"></i> check</button>
+            </div>
+        </div>
+
+        <!-- Q13 -->
+        <div class="glass-panel q-card" id="qCard-13">
+            <h2><i class="fa-solid fa-ear-listen"></i> Culture & Context</h2>
+            <div class="question-text">
+                <span class="q-number">13</span> 
+                <div>
+                    When the waiter approaches your table, they usually ask: "Are you ready to ________?"
+                    <span class="pt-text">Quando o empregado chega à mesa, costuma perguntar: "Estão prontos para ________?"</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 13, false)"><i class="fa-regular fa-circle"></i> pay</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 13, false)"><i class="fa-regular fa-circle"></i> eat</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 13, true)"><i class="fa-regular fa-circle"></i> order</button>
+            </div>
+        </div>
+
+        <!-- Q14 -->
+        <div class="glass-panel q-card" id="qCard-14">
+            <h2><i class="fa-solid fa-utensils"></i> Culture & Context</h2>
+            <div class="question-text">
+                <span class="q-number">14</span> 
+                <div>
+                    The main, large dish of your meal (like a steak or pasta) is called the ________.
+                    <span class="pt-text">O prato principal da refeição é chamado de ________.</span>
+                </div>
+            </div>
+            <div class="hw-options">
+                <button class="hw-opt-btn" onclick="checkOption(this, 14, false)"><i class="fa-regular fa-circle"></i> Beverage</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 14, true)"><i class="fa-regular fa-circle"></i> Entree</button>
+                <button class="hw-opt-btn" onclick="checkOption(this, 14, false)"><i class="fa-regular fa-circle"></i> Appetizer</button>
+            </div>
+        </div>
+
+        <!-- Q15: WRITING -->
+        <div class="glass-panel q-card" id="qCard-15">
+            <h2><i class="fa-solid fa-pen-nib"></i> Part 4: Your Information (Writing)</h2>
+            <p><strong><span class="q-number" style="font-size:1rem; width:28px; height:28px; margin-right:10px;">15</span> Write 3 sentences about eating out.</strong><br> 
+            <span class="pt-text" style="display: block; margin-top: 5px;">Escreve 3 frases sobre comer fora. Usa: O teu restaurante favorito, o que costumas pedir (I would like...) e se deixas gorjeta.</span></p>
+            
+            <textarea id="writing-task" rows="5" placeholder="Example: My favorite restaurant is an Italian place. I usually ask 'Can I get a pizza?'. Yes, I always leave a tip." oninput="checkWritingLength()"></textarea>
+            
+            <button id="final-submit-btn" class="btn-submit" style="display:none;" onclick="finishHomework()"><i class="fa-solid fa-paper-plane"></i> Submit Mission</button>
+        </div>
+
+        <div id="score-display">
+            MISSION COMPLETE! <i class="fa-solid fa-trophy" style="color: gold;"></i><br>
+            <span style="font-size: 1.4rem; color: #fff; font-family: var(--font-body); font-weight: normal; margin-top:15px; display:block;">Take a screenshot of your progress and send it to your teacher!<br><span class="pt-text" style="color: #cbd5e1; font-size: 1.1rem;">Tira uma captura de ecrã (screenshot) e envia ao teu professor!</span></span>
+        </div>
+
+    </div>
+
+    <script>
+        let solvedCount = 0;
+
+        function startHomework() {
+            const name = document.getElementById('student-name').value;
+            if(!name || name.trim() === '') {
+                alert("Please type your name to start the mission!");
+                document.getElementById('student-name').focus();
+                return;
+            }
+            
+            // Hide Header, Show Q1
+            document.getElementById('header-panel').style.display = 'none';
+            document.getElementById('progress-hud').innerText = `0 / 15`;
+            
+            const firstCard = document.getElementById('qCard-1');
+            firstCard.style.display = 'block';
+            setTimeout(() => {
+                firstCard.classList.add('visible');
+            }, 50);
+        }
+
+        function checkOption(btn, qNumber, isCorrect) {
+            // Prevent clicking if card is already solved
+            if(btn.parentElement.parentElement.classList.contains('locked')) return;
+
+            if(isCorrect) {
+                // Mark correct
+                btn.classList.add('correct');
+                btn.innerHTML = `<i class="fa-solid fa-check-circle"></i>` + btn.innerHTML.substring(btn.innerHTML.indexOf('</i>') + 4);
+                
+                // Lock the card
+                const card = document.getElementById('qCard-' + qNumber);
+                card.classList.add('locked');
+                
+                // Update HUD
+                solvedCount++;
+                document.getElementById('progress-hud').innerText = `${solvedCount} / 15`;
+
+                // Show next card
+                let nextQ = qNumber + 1;
+                let nextCard = document.getElementById('qCard-' + nextQ);
+                
+                if(nextCard) {
+                    nextCard.style.display = 'block';
+                    setTimeout(() => {
+                        nextCard.classList.add('visible');
+                        // Smooth scroll slightly offset to show the new card fully
+                        const yOffset = -50; 
+                        const y = nextCard.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({top: y, behavior: 'smooth'});
+                    }, 100);
+                }
+            } else {
+                // Wrong answer effect
+                btn.classList.add('error');
+                btn.innerHTML = `<i class="fa-solid fa-times-circle"></i>` + btn.innerHTML.substring(btn.innerHTML.indexOf('</i>') + 4);
+                setTimeout(() => {
+                    btn.classList.remove('error');
+                    btn.innerHTML = `<i class="fa-regular fa-circle"></i>` + btn.innerHTML.substring(btn.innerHTML.indexOf('</i>') + 4);
+                }, 500);
+            }
+        }
+
+        function checkWritingLength() {
+            const text = document.getElementById('writing-task').value;
+            const btn = document.getElementById('final-submit-btn');
+            // If the user has typed a reasonable amount of text
+            if(text.length > 20) {
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        function finishHomework() {
+            const writingCard = document.getElementById('qCard-15');
+            writingCard.classList.add('locked');
+            writingCard.style.pointerEvents = 'none';
+            
+            document.getElementById('final-submit-btn').style.display = 'none';
+            
+            solvedCount++;
+            document.getElementById('progress-hud').innerText = `15 / 15`;
+            document.getElementById('progress-hud').style.background = 'var(--correct)';
+            document.getElementById('progress-hud').style.color = '#020617';
+            document.getElementById('progress-hud').style.borderColor = 'var(--correct)';
+
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.style.display = 'block';
+            
+            setTimeout(() => {
+                scoreDisplay.scrollIntoView({behavior: 'smooth', block: 'end'});
+            }, 100);
+
+            fireConfetti();
+        }
+
+        // --- NATIVE JS CONFETTI ---
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            let particles = [];
+            const colors = ['#ef4444', '#f59e0b', '#ffffff', '#10b981', '#fde047'];
+            
+            for(let i=0; i<150; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 10 + 5,
+                    c: colors[Math.floor(Math.random() * colors.length)],
+                    dy: Math.random() * 4 + 2,
+                    dx: Math.random() * 4 - 2,
+                    rot: Math.random() * 360,
+                    rs: Math.random() * 5 - 2.5
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+                
+                particles.forEach(p => {
+                    p.y += p.dy; 
+                    p.x += p.dx; 
+                    p.rot += p.rs;
+                    
+                    if(p.y < canvas.height) active = true;
+                    
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.fillStyle = p.c;
+                    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                    ctx.restore();
+                });
+                
+                if(active) requestAnimationFrame(animate);
+                else ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            animate();
+            
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+    </script>
+</body>
+</html>
